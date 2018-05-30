@@ -1,0 +1,2 @@
+# tradeprint
+Captura de Prints
