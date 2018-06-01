@@ -1,9 +1,53 @@
 #!/bin/bash
 #AUTOR JORGE DIAS jorgediasdsg@gmail.com https://github.com/jorgedsdsg/captura
 cd $HOME/TRADE/tradeprint
-e(){ echo $1; }; p(){ clear; seq 7 8 180 | paste -sd \X; e ""; e " SISTEMA CAPTURA DE TELA E ENVIO DE EMAIL"; e ""; e "	$1"; e ""; seq 7 8 180 | paste -sd \X; }; d=$(date +%d-%m-%Y-%X); s=sites.txt; m=emails.txt; l=`pwd`; w=google-chrome-stable; a=chrome
-r(){ grep -v "^#" $s > g; while read n k; do d=$(date +%d-%m-%Y-%X); $w $k; e "$n - $d - $k" >> r; sleep 12; gnome-screenshot -f $l/$n-$d.png; done < g; killall $a; }
-t(){ e "-----------------------------------------------" > $l/c; e "RELATORIO DE SITES ACESSADOS" >> $l/c; e "" >> $l/c; cat r >> $l/c; e "" >> $l/c; e "" >> $l/c; e "" >> $l/c; e "ATT NELSON BORCHARDT" >> $l/c; e "-----------------------------------------------" >> $l/c; }
-j(){ grep -v "^#" $m > y; while read z n WHATS; do mutt -s "$n - SEU RELATORIO TRADE DE $d" $z < c -a $l/*.png; done < y; }
-v(){ rm -rf $l/*.zip $l/c $l/y  $l/r $l/g $l/*.png; p "SESSAO ENCERRADA, PODE VOLTAR A TOMAR CAFÉ"; }
-r; t; j; v; killall gnome-terminal-server
+e(){ echo $1; } 						#Substitue echo por e
+d=$(date +%d-%m-%Y-%X) 						#Captura a data do sistema para nomear os arquivos.
+s=sites.txt  							#Chama o arquivos com sites.
+m=emails.txt 							#Chama o arquivo com e-mails.
+l=`pwd` 							#Localiza a pasta atual do sistema.
+navegador=google-chrome-stable 					#Nome do navegador, Substitua aqui.
+a=chrome 							#Nome do processo no navegador que será encerrado.
+captura(){
+	grep -v "^#" $s > sites 
+	while read site link; do 				#Abre o laço de execução dos screenshots.
+		$navegador $link 				#Abre navegador com o link do arquivo sites.txt.
+		e "Abrindo site $link"
+		e "$site - $d - $link" >> r 			#Adiciona linha ao relatório que será enviado.
+		sleep 12 					#Tempo de delay para carregar o site no navegador.
+		e "Capturando dados de $link"
+		wget -q $link -O "$site.dados"
+		d=$(date +%d-%m-%Y-%X) 				#Captura a data para o arquivo que será capturado.
+		gnome-screenshot -f $l/$site-$d.png 		#Executa o screenshot e salva com o nome do link e a data atual.
+		valor=`cat "$site.dados" | grep "last_last" | sed "s/<\/span>.*// ; s/.*>//"`
+		variacao=`cat "$site.dados" | grep "pc\" dir=\"ltr\"" | sed "s/<\/span>.*// ; s/.*\"ltr\">//"`
+		porcentagem=`cat "$site.dados" | grep "pcp parentheses\" dir=\"ltr\"" | sed "s/<\/span>.*// ; s/.*ltr\">//"`
+		e "$site	$valor	$variacao	$porcentagem	$d	$link" >> $l/dados.txt
+		e "" >> $l/dados.txt
+		e "$site;	$valor;	$variacao;	$porcentagem;	$d;	$link;" >> $HOME/dados.csv
+	done < sites 						# Chama o arquivo sites.txt para o laço.
+	killall $a; 						#Fecha o navegador após o laço.
+}
+cria_email(){ 							#Modelo de e-mail que será enviado
+	e "-----------------------------" > $l/c
+	e "RELATORIO DE SITES ACESSADOS" >> $l/c
+	e "" >> $l/c
+	e "PAR----VALOR--VARIAÇÃO---%-----------DATA---------LINK--------->" >> $l/c
+	e "" >> $l/c
+	cat dados.txt >> $l/c
+	e "" >> $l/c
+	e "ATT NELSON BORCHARDT" >> $l/c
+	e "-----------------------------" >> $l/c
+}
+envia_email(){
+	grep -v "^#" $m > y
+	while read z n WHATS; do 
+		e "Enviando e-mail para $z"
+		mutt -s "$n - SEU RELATORIO TRADE DE $d" $z < c -a $l/*.png $HOME/dados.csv; done < y
+}
+remove_temporarios(){ rm -rf $l/c $l/y  $l/r $l/g $l/*.png $l/*.dados $l/sites $l/dados $l/dados.txt; e "SESSAO ENCERRADA, PODE VOLTAR A TOMAR CAFÉ"; }
+captura
+cria_email
+envia_email
+remove_temporarios
+killall gnome-terminal-server;
