@@ -25,6 +25,7 @@ captura(){
 		e "$site	$valor	$variacao	$porcentagem	$d	$link" >> $l/dados.txt
 		e "" >> $l/dados.txt
 		e "$site;	$valor;	$variacao;	$porcentagem;	$d;	$link;" >> $HOME/dados.csv
+		paste <(grep "data-real-valu" $site.dados | sed "s/<\/td>.*// ; s/.*\">//" | sed "s/ var.*//" | xargs -n 5) <(grep "\<td\> class=\"bold" $site.dados | sed 's/<\/td>.*/ '$site'/ ; s/.*\">/ /') >> $HOME/historico.csv
 	done < sites 						# Chama o arquivo sites.txt para o laço.
 	killall $a; 						#Fecha o navegador após o laço.
 }
@@ -43,7 +44,7 @@ envia_email(){
 	grep -v "^#" $m > y
 	while read z n WHATS; do 
 		e "Enviando e-mail para $z"
-		mutt -s "$n - SEU RELATORIO TRADE DE $d" $z < c -a $l/*.png $HOME/dados.csv; done < y
+		mutt -s "$n - SEU RELATORIO TRADE DE $d" $z < c -a $l/*.png $HOME/dados.csv $HOME/historico.csv; done < y
 }
 remove_temporarios(){ rm -rf $l/c $l/y  $l/r $l/g $l/*.png $l/*.dados $l/sites $l/dados $l/dados.txt; e "SESSAO ENCERRADA, PODE VOLTAR A TOMAR CAFÉ"; }
 captura
