@@ -26,8 +26,10 @@ captura(){
 		e "" >> $l/dados.txt
 		e "$site;	$valor;	$variacao;	$porcentagem;	$d;	$link;" >> $HOME/dados.csv
 		paste <(grep "data-real-valu" $site.dados | sed "s/<\/td>.*// ; s/.*\">//" | sed "s/ var.*//" | xargs -n 5) <(grep "\<td\> class=\"bold" $site.dados | sed 's/<\/td>.*/ '$site'/ ; s/.*\">/ /') >> $HOME/historico.csv
+		killall $a; 						#Fecha o navegador após o laço.
+		x-terminal-emulator -e chromium-browser
 	done < sites 						# Chama o arquivo sites.txt para o laço.
-	killall $a; 						#Fecha o navegador após o laço.
+
 }
 cria_email(){ 							#Modelo de e-mail que será enviado
 	e "-----------------------------" > $l/c
