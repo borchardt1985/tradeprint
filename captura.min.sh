@@ -6,19 +6,19 @@ d=$(date +%d-%m-%Y-%X) 						#Captura a data do sistema para nomear os arquivos.
 s=sites.txt  							#Chama o arquivos com sites.
 m=emails.txt 							#Chama o arquivo com e-mails.
 l=`pwd` 							#Localiza a pasta atual do sistema.
-navegador=google-chrome-stable 					#Nome do navegador, Substitua aqui.
-a=chrome 							#Nome do processo no navegador que será encerrado.
+navegador=chromium-browser 					#Nome do navegador, Substitua aqui.
+a=chromium-browser						#Nome do processo no navegador que será encerrado.
 captura(){
 	grep -v "^#" $s > sites 
 	while read site link; do 				#Abre o laço de execução dos screenshots.
 		$navegador $link 				#Abre navegador com o link do arquivo sites.txt.
 		e "Abrindo site $link"
 		e "$site - $d - $link" >> r 			#Adiciona linha ao relatório que será enviado.
-		sleep 12 					#Tempo de delay para carregar o site no navegador.
+		sleep 20 					#Tempo de delay para carregar o site no navegador.
 		e "Capturando dados de $link"
 		wget -q $link -O "$site.dados"
 		d=$(date +%d-%m-%Y-%X) 				#Captura a data para o arquivo que será capturado.
-		gnome-screenshot -f $l/$site-$d.png 		#Executa o screenshot e salva com o nome do link e a data atual.
+		scrot $l/$site-$d.png 		#Executa o screenshot e salva com o nome do link e a data atual.
 		valor=`cat "$site.dados" | grep "last_last" | sed "s/<\/span>.*// ; s/.*>//"`
 		variacao=`cat "$site.dados" | grep "pc\" dir=\"ltr\"" | sed "s/<\/span>.*// ; s/.*\"ltr\">//"`
 		porcentagem=`cat "$site.dados" | grep "pcp parentheses\" dir=\"ltr\"" | sed "s/<\/span>.*// ; s/.*ltr\">//"`
@@ -51,4 +51,4 @@ captura
 cria_email
 envia_email
 remove_temporarios
-killall gnome-terminal-server;
+killall x-terminal-emulator;
