@@ -13,7 +13,7 @@ captura(){
 	while read site link; do 				#Abre o laço de execução dos screenshots.
 		#$navegador $link 				#Abre navegador com o link do arquivo sites.txt.
 		#e "Abrindo site $link"
-		e "$site - $d - $link" >> r 			#Adiciona linha ao relatório que será enviado.
+		#e "$site - $d - $link" >> r 			#Adiciona linha ao relatório que será enviado.
 		#sleep 20 					#Tempo de delay para carregar o site no navegador.
 		e "Capturando dados de $link"
 		wget -q $link -O "$site.dados"
@@ -54,4 +54,4 @@ captura
 cria_email
 envia_email
 remove_temporarios
-killall x-terminal-emulator;
+#killall x-terminal-emulator;
